@@ -11,21 +11,21 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Employed youth in poverty'
+            text: 'Employed youth living in poverty'
         },
         subtitle: {
-            text: 'Source: CIA World Factbook'
+            text: ''
         },
         xAxis: {
             categories: [
-				'Employed youth in poverty', 'China','India','United States','Bangladesh','Russia','Japan','Mexico','Germany','France'
+				'China','India','US','Bangladesh','Employed youth in poverty','Russia','Japan','Mexico','Germany','France'
             ],
             crosshair: true
         },
         yAxis: {
             min: 0,
             title: {
-                text: '-----'
+                text: 'Population Size'
             }
         },
         tooltip: {
@@ -48,7 +48,8 @@ $(function () {
         series: [{
             name: '',
             showInLegend: false,
-            data: [{ y: 1367485388, color: '#2c7fb8'},1251695584,321368864,168957745,156000000,142423773,126919659,121736809,80854408,66553766]
+				data: [1367485388,1251695584,321368864,168957745,{ y: 156000000, color: '#2c7fb8'},142423773,126919659,121736809,80854408,66553766]
+
         }]
     });
 });
@@ -66,7 +67,7 @@ $(function () {
 <center><div style="width:545px">
 
 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-
+<div>Source: CIA World Factbook</div>
 </div></center>
   
 </body>
