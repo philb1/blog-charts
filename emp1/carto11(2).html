@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<style>
+body {
+	background-color: rgb(255,255,255);
+}
+path {
+  fill: #ccc;
+  stroke: #000;
+  shape-rendering: optimizeSpeed;
+}
+.axis path, .axis line {
+	opacity: 0;
+}
+/* MENU */
+text {
+	font-family: verdana;
+	font-size: 8.75pt;
+	fill: rgb(60,60,60);
+}
+circle {
+	fill: #a6bddb;
+	cursor: pointer;
+	stroke: white;
+	stroke-width: 2.2px;
+}
+.countrytext {
+	font-size:12pt;
+}
+.tooltip {
+	font-family: verdana;
+	position: absolute;
+	display: block;
+	opacity: 0;
+	color: white;
+	background-color: rgb(20,20,20);
+	padding: 3px 6px 6px 6px;
+	pointer-events: none;
+	border-radius: 2px;
+	z-index: 1000;
+}
+.tooltip2 {
+	margin: 3px;
+	padding: 0px;
+	font-size: 12pt;
+	font-weight: 600;
+	width:100%;
+	display: inline;
+}
+.tooltip3 {
+	margin: 3px;
+	padding: 0px;
+	font-size: 10pt;
+	font-weight: 400;
+}
+.box {
+	position: absolute;
+	text-align: center;
+	background-color: transparent;
+	top: 20px;
+	left: 0px;
+	width: 350px;
+	height: 100px;
+	margin: 0px;
+	padding: 0px;
+}
+.pagetitle {
+	opacity: 1;
+	font-family: verdana;
+	font-size: 12pt;
+	position: relative;
+	text-align: center;
+	font-weight: 900;
+	color: rgb(230,230,230);
+	background-color: transparent;
+	pointer-events: none;
+	margin: 0px;
+	padding: 0px;
+}
+.amount {
+	font-family: verdana; 
+        margin: 0px;
+        padding: 0px;
+        font-size: 20pt;
+        fill: #0570b0;
+        font-weight: 900;
+}
+.measure {
+	font-family: verdana;
+	text-align: center;
+	font-size: 18pt;
+	position: absolute;
+	left: 600px;
+	color: black;
+	background-color: transparent;
+	width: 100%;
+}
+.container {
+//	border: solid 2px green;
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	padding-bottom: 58%;
+	vertical-align: middle;
+	overflow: hidden;
+}
+.content {
+	display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+/* SVG */
+#eurMapYouth {
+//	border: solid 2px red;
+}
+</style>
+</head>
+<body>
+<script src="files/d3.v3.min.js"></script>
+<script src="files/d3.geo.projection.min.js"></script>
+
+<div class="tooltip">
+	<p class="tooltip2">Country</p>
+	<div class="tooltip3">-: <span class="quantity">- - -</span></div>
+</div>
+
+<div class="container">
+	<svg id="eurMapYouth" version="1.1" viewBox="0 0 836 450" preserveAspectRatio="xMinYMin meet" class="content">
+		<text class="pagetitle">Select a variable</text>
+		<text class="amount summary"></text>
+	</svg>
+</div>
+
+<script>
+var widthf = 1000;
+var heightf = widthf * 0.6;
+var dimratio = widthf / 1000;
+var w = window,
+	d = document,
+	e = d.documentElement,
+	g = d.getElementsByTagName('eurMapYouth')[0];
+var wratio = ( w.innerWidth || e.clientWidth || g.clientWidth )*0.9 / 1000;
+//var colors = {1000000074: "#e31a1c",1000000086: "#e31c1b",1000000158: "#166f1a",1000000162: "#e4211a",1000000166: "#e52419",1000000239: "#e52619",1000000260: "#e62918",1000000334: "#e72b17",1000000581: "#e72e17",1002011132: "#e83016",1002011204: "#e83316",1002011270: "#e93515",1002011288: "#e93815",1002011324: "#ea3a14",1002011384: "#eb3d13",1002011430: "#eb3f13",1002011466: "#ec4212",1002011478: "#ec4412",1002011562: "#ed4711",1002011566: "#ed4911",1002011624: "#ee4c10",1002011654: "#ef4e0f",1002011686: "#ef510f",1002011694: "#f0530e",1002011768: "#f0560e",1002011854: "#f1590d",1002014108: "#f15b0d",1002014174: "#f25e0c",1002014175: "#f3600b",1002014231: "#f3630b",1002014232: "#f4650a",1002014262: "#f4680a",1002014404: "#f56a09",1002014450: "#f56d09",1002014454: "#f66f08",1002014480: "#f77207",1002014508: "#f77407",1002014638: "#f87706",1002014646: "#f87906",1002014690: "#f97c05",1002014706: "#f97e05",1002014716: "#fa8104",1002014800: "#fb8303",1002014834: "#fb8603",1002014894: "#fc8802",1002015012: "#fc8b02",1002015434: "#fd8d01",1002015504: "#fd9001",1002015736: "#fe9200",1002015788: "#ff9500",1002015818: "#ff9700",1002017024: "#ff9900",1002017120: "#ff9b00",1002017140: "#ff9e00",1002017148: "#ffa000",1002017178: "#ffa200",1002017180: "#ffa400",1002017226: "#ffa600",1002017266: "#ffa800",1002017678: "#ffab00",1002018072: "#ffad00",1002018426: "#ffaf00",1002018516: "#ffb100",1002018710: "#ffb300",1002018748: "#ffb600",1009053036: "#ffb8e1",1009053554: "#ff67ff",1009053574: "#ffbc00",1009054090: "#ffbe00",1009054242: "#ffc000",1009054540: "#ffc300",1009054548: "#ffc500",1009054598: "#29c700",1009057296: "#ffc900",1009057316: "#ffcb00",1009057520: "#ffcd00",1009057580: "#ffd000",1009057583: "#ffd200",1009057584: "#ffd400",1009057585: "#ffd600",1009061016: "#ffd800",1009061184: "#ffda00",1009061258: "#ffdd00",1009061570: "#ffdf00",1009061612: "#ffeb68",1009061772: "#ffe300",1009061776: "#ffe500",1009061798: "#ffe700",1009061876: "#fff25f",1009061882: "#f5e100",1019005032: "#ffee00",1019005068: "#fff55e",1019005076: "#fff65e",1019005152: "#fffa8b",1019005170: "#ffec00",1019005218: "#fff900",1019005238: "#e7e700",1019005254: "#fffd00",1019005328: "#ffff6b",1019005600: "#f6ff00",1019005604: "#dddd00",1019005740: "#edff00",1019005858: "#e8ff00",1019005862: "#f3f300",1019013084: "#ff0000",1019013188: "#ff0064",1019013222: "#ff0000",1019013320: "#ff0064",1019013340: "#ff001b",1019013484: "#dd0021",1019013558: "#ff001b",1019013591: "#ff0099",1019021060: "#ff006f",1019021124: "#d0000d",1019021304: "#f10024",1019021666: "#ff0088",1019021840: "#ff0019",1019029028: "#ff0076",1019029044: "#ff0076",1019029052: "#ff0076",1019029092: "#ff0076",1019029136: "#ff0076",1019029192: "#ff0076",1019029212: "#ff00bc",1019029214: "#ff0046",1019029308: "#ff00bc",1019029312: "#ff00bc",1019029332: "#ff00bc",1019029388: "#ff00bc",1019029474: "#ff00bc",1019029500: "#ff00bc",1019029530: "#ff00bc",1019029533: "#ff00bc",1019029630: "#ff0033",1019029652: "#ff0033",1019029659: "#ff0033",1019029660: "#ff0033",1019029662: "#ff0033",1019029663: "#ff0033",1019029670: "#ff0012",1019029780: "#ff0012",1019029796: "#ff0012",1019029850: "#ff0012",1142030156: "#11ff00",1142030344: "#0cff00",1142030392: "#048a00",1142030408: "#02ff00",1142030410: "#00c800",1142030446: "#00f608",1142030496: "#00f10d",1142034004: "#00ec12",1142034050: "#00e618",1142034064: "#00e11d",1142034144: "#00dc22",1142034356: "#00d727",1142034364: "#b4862a",1142034462: "#00cc32",1142034524: "#00c737",1142034586: "#00c23c",1142035096: "#00bd41",1142035104: "#00b747",1142035116: "#00b24c",1142035360: "#00ad51",1142035418: "#00a856",1142035458: "#00a35b",1142035608: "#009d61",1142035626: "#009866",1142035702: "#00936b",1142035704: "#008e70",1142035764: "#008876",1142143398: "#00837b",1142143417: "#007e80",1142143762: "#007985",1142143795: "#00748a",1142143860: "#006e90",1142145031: "#006995",1142145048: "#00649a",1142145051: "#005f9f",1142145196: "#0059a5",1142145268: "#0054aa",1142145275: "#c97d3f",1142145368: "#b4772a",1142145376: "#cd8226",1142145400: "#b4772a",1142145414: "#9d6724",1142145422: "#b4772a",1142145512: "#d38424",1142145634: "#b4772a",1142145682: "#946122",1142145760: "#b4772a",1142145784: "#b07022",1142145792: "#d58b31",1142145887: "#b4772a",1150039008: "#000bf3",1150039020: "#0006f8",1150039070: "#0001fd",1150039191: "#0300ff",1150039292: "#0800ff",1150039300: "#0c00ff",1150039336: "#1100ff",1150039380: "#7e00ff",1150039470: "#1a00ff",1150039499: "#1e00ff",1150039620: "#d300ff",1150039674: "#2700ff",1150039688: "#2b00ff",1150039705: "#3000ff",1150039724: "#a500ff",1150039807: "#3900ff",1150151100: "#3d00ff",1150151112: "#4200ff",1150151203: "#a000ff",1150151348: "#4b00ff",1150151498: "#4f00ff",1150151616: "#9d00ff",1150151642: "#5800ff",1150151643: "#5d00ff",1150151703: "#6100ff",1150151804: "#6600ff",1150154208: "#6a00ff",1150154233: "#6f00ff",1150154234: "#7300ff",1150154246: "#7800ff",1150154248: "#7c00ff",1150154352: "#8100ff",1150154372: "#a800ff",1150154428: "#8a00ff",1150154440: "#8e00ff",1150154578: "#9300ff",1150154744: "#9700ff",1150154752: "#9c00ff",1150154826: "#cc00ff",1150154831: "#a500ff",1150154832: "#a900ff",1150154833: "#ae00ff",1150155040: "#b200ff",1150155056: "#b700ff",1150155250: "#bb00ff",1150155276: "#9600ff",1150155438: "#c400ff",1150155442: "#c900ff",1150155492: "#cd00ff",1150155528: "#d200ff",1150155756: "#d600ff"};
+var colors = {1150155040 : "#0570b0",1150155056 : "#0570b0",1150151100 : "#a6bddb",1150039070 : "#a6bddb",1150151112 : "#a6bddb",1150155756 : "#a6bddb",1150151203 : "#a6bddb",1150155276 : "#0570b0",1150154208 : "#0570b0",1150039724 : "#0570b0",1150154233 : "#a6bddb",1150154246 : "#0570b0",1150154826 : "#a6bddb",1150039300 : "#0570b0",1150039191 : "#0570b0",1150151348 : "#0570b0",1150154372 : "#0570b0",1150154352 : "#a6bddb",1150039380 : "#0570b0",1150154440 : "#a6bddb",1150155442 : "#0570b0",1150154428 : "#0570b0",1150151498 : "#a6bddb",1150039807 : "#a6bddb",1150039499 : "#a6bddb",1150155528 : "#a6bddb",1150154578 : "#a6bddb",1150151616 : "#0570b0",1150039620 : "#0570b0",1150151642 : "#0570b0",1150151703 : "#0570b0",1150039705 : "#0570b0",1150154752 : "#0570b0",1142145792 : "#a6bddb",1150151804 : "#a6bddb",1150154208 : "#0570b0",1150155250 : "#0570b0",1150154826 : "#a6bddb",1150039300 : "#0570b0",1150039380 : "#0570b0",1142145792 : "#a6bddb",1150039688 : "#a6bddb",1142145196 : "#0570b0"};
+
+var width = 1000 * dimratio;
+var height = 570 * dimratio;
+
+var svg = d3.select("svg");
+
+d3.select(".pagetitle").attr("x",30).attr("y",40).attr("text-anchor","left");
+d3.select(".amount").attr("x",30).attr("y",80).attr("text-anchor","left");
+
+d3.select(".tooltip").style("border-radius",(d3.round(2*wratio)) + "px").style("padding",(d3.round(2*wratio)) + "px");
+d3.select(".tooltip2").style("font-size",(d3.round(16*wratio)) + "pt").style("margin",(d3.round(4*wratio)) + "px");
+d3.select(".tooltip3").style("font-size",(d3.round(14*wratio)) + "pt").style("margin",(d3.round(4*wratio)) + "px");
+
+var projection = d3.geo.miller()
+    .scale(340 * dimratio)  //140
+    .translate([width / 2 + 60*dimratio, height / 2 + 80*dimratio])
+    .center([30.6,30])
+//    .precision(.1);
+
+d3.json("json/1.geojson", function(polygon1) { 
+d3.json("json/1a.geojson", function(polygon2) { 
+d3.json("json/1b.geojson", function(polygon3) { 
+d3.json("json/1c.geojson", function(polygon4) { 
+d3.json("json/1d.geojson", function(polygon5) { 
+
+	var path = svg.append("path");	
+	var path1 = svg.append("path");
+	
+	var countries = polygon1.features.length;
+	alignfeatureorder(polygon1, polygon2);
+	alignfeatureorder(polygon3, polygon4);
+	alignfeatureorder(polygon5, polygon1);	
+	
+	var k = -1;
+	
+	var line1 = [];
+	var line2 = [];
+	var line3 = [];
+	var line4 = [];
+	var line5 = [];
+
+	var avgpoints = 0;
+	
+	var mostpoints;
+	var rotation;
+	while (k++ < (countries - 1)) {
+			
+		  line1 = polygon1.features[k].geometry.coordinates[0];
+		  line2 = polygon2.features[k].geometry.coordinates[0];
+		  line3 = polygon3.features[k].geometry.coordinates[0];
+		  line4 = polygon4.features[k].geometry.coordinates[0];		  
+		  line5 = polygon5.features[k].geometry.coordinates[0];
+		 
+		  mostpoints = Math.max(line1.length, line2.length, line3.length, line4.length, line5.length);
+		  
+		  if (line1.length == mostpoints) {
+		  	line2 = addpts(line2, 0, line2.length, line1.length);
+		  	line3 = addpts(line3, 0, line3.length, line1.length);
+		  	line4 = addpts(line4, 0, line4.length, line1.length);
+		  	line5 = addpts(line5, 0, line5.length, line1.length);
+		  } else if (line2.length == mostpoints) {
+		  	line1 = addpts(line1, 0, line1.length, line2.length);
+		  	line3 = addpts(line3, 0, line3.length, line2.length);
+		  	line4 = addpts(line4, 0, line4.length, line2.length);
+		  	line5 = addpts(line5, 0, line5.length, line2.length);
+		  } else if (line3.length == mostpoints) {
+		  	line1 = addpts(line1, 0, line1.length, line3.length);
+		  	line2 = addpts(line2, 0, line2.length, line3.length);
+		  	line4 = addpts(line4, 0, line4.length, line3.length);
+		  	line5 = addpts(line5, 0, line5.length, line3.length);
+		  } else if (line4.length == mostpoints) {
+		  	line1 = addpts(line1, 0, line1.length, line4.length);
+		  	line2 = addpts(line2, 0, line2.length, line4.length);
+		  	line3 = addpts(line3, 0, line3.length, line4.length);
+		  	line5 = addpts(line5, 0, line5.length, line4.length);
+		  } else{
+		  	line1 = addpts(line1, 0, line1.length, line5.length);
+		  	line2 = addpts(line2, 0, line2.length, line5.length);
+		  	line3 = addpts(line3, 0, line3.length, line5.length);
+		  	line4 = addpts(line4, 0, line4.length, line5.length);
+		  }		  
+		  
+		  polygon1.features[k].geometry.coordinates[0] = line1;
+		  polygon2.features[k].geometry.coordinates[0] = line2;
+		  polygon3.features[k].geometry.coordinates[0] = line3;
+		  polygon4.features[k].geometry.coordinates[0] = line4;
+		  polygon5.features[k].geometry.coordinates[0] = line5;
+		  
+		  rotation = calcrotation(line1, line2);
+		  polygon2.features[k].geometry.coordinates[0] = rotatearray(polygon2.features[k].geometry.coordinates[0], -rotation);
+		  rotation = calcrotation(line1, line3);
+		  polygon3.features[k].geometry.coordinates[0] = rotatearray(polygon3.features[k].geometry.coordinates[0], -rotation);		  
+		  rotation = calcrotation(line1, line4);
+		  polygon4.features[k].geometry.coordinates[0] = rotatearray(polygon4.features[k].geometry.coordinates[0], -rotation);
+		  rotation = calcrotation(line1, line5);
+		  polygon5.features[k].geometry.coordinates[0] = rotatearray(polygon5.features[k].geometry.coordinates[0], -rotation);
+
+		  polygon1.features[k].geometry.coordinates[0] = polygon1.features[k].geometry.coordinates[0].map(projection);
+		  polygon2.features[k].geometry.coordinates[0] = polygon2.features[k].geometry.coordinates[0].map(projection);
+		  polygon3.features[k].geometry.coordinates[0] = polygon3.features[k].geometry.coordinates[0].map(projection);
+		  polygon4.features[k].geometry.coordinates[0] = polygon4.features[k].geometry.coordinates[0].map(projection);
+		  polygon5.features[k].geometry.coordinates[0] = polygon5.features[k].geometry.coordinates[0].map(projection);
+	}
+
+	svg.selectAll("circle")
+                .data([1,2,3,4,5])
+                .enter()
+                .append("circle")
+		.style("fill","##a6bddb")
+		.attr("class", function(d){
+			return "circle circle" + d;
+		})
+		.attr("r",20*dimratio)
+		.attr("cx", function(d){
+//			return 350* dimratio + 80*(d-1)*dimratio;
+			return 50* dimratio + 165*(d-1)*dimratio;
+		})
+		.attr("cy",380*dimratio)
+		.on("click", function(d){
+			mapshift(d);
+		});
+	d3.select(".circle1")
+		.style("fill","#0570b0")
+		.attr("r",24*dimratio);
+
+	var selectedvariable = 1;
+	
+	function mapshift(n) {
+		d3.selectAll(".circle")
+			.transition()
+			.duration(500)
+			.style("fill","#a6bddb")
+			.attr("r",20*dimratio);
+		d3.select(".circle" + n)
+			.transition()
+			.duration(500)
+			.style("fill","#0570b0")
+			.attr("r",24*dimratio);
+		d3.selectAll(".summary")
+			.style("opacity",1);
+		selectedvariable = n;
+		if (n==1) {normal();}
+		if (n==2) {data1();}
+		if (n==3) {data2();}
+		if (n==4) {data3();}
+		if (n==5) {data4();}
+	}
+
+	var x = d3.scale.ordinal()
+	    //.domain(["None", "data1", "data2", "data3", "data4"])
+	    .domain(["None", "Total Employment/Volontary", "Total Employment/Involontary", "Part-time Employment/Volontary", "Part-time Employment/Involontary"])
+	    .rangePoints([50 * dimratio, 720 * dimratio]);
+	
+	var xAxis = d3.svg.axis()
+	    .scale(x)
+	    .orient("bottom");
+	
+	svg.append("g")
+	    .attr("class", "x axis")
+	    .call(xAxis)
+	    .attr("transform", "translate(0," + (400*dimratio) + ")");
+		var pathn = d3.geo.path().projection(null);
+		var tempmap = svg.selectAll("pathx")
+		   .data(polygon1.features)
+		   .enter()
+		   .append("path")
+		   .attr("d", pathn)
+		   .style("stroke", "white")
+		   .style("stroke-width", 0.6)
+		   .style("fill", function(d){
+			return colors[d.properties.code];
+		   })
+		   .attr("class","country")
+		   .on("mousemove", function(d){
+			mouseover(d.properties);
+		   })
+		   .on("mouseout", function(d){
+			mouseout(d.properties.code);
+		   });
+	normal();
+
+	function normal(){
+			tempmap.data(polygon1.features).transition().duration(2000).attr("d", pathn);
+			d3.select(".pagetitle")
+				.text("Select a variable");
+			d3.selectAll(".summary")
+				.style("opacity",0);	
+				}
+	function data1(){
+			tempmap.data(polygon2.features).transition().duration(2000).attr("d", pathn);
+			d3.select(".pagetitle")
+				.text("Temporary Employment/Volontary");
+			d3.select(".amount")
+				.text("EU-28: 27.3%");
+	}
+	function data2(){
+			tempmap.data(polygon3.features).transition().duration(2000).attr("d", pathn);
+			d3.select(".pagetitle")
+				.text("Temporary Employment/Involontary");
+			d3.select(".amount")
+				.text("EU-28: 16.2%");
+	}
+	function data3(){
+			tempmap.data(polygon4.features).transition().duration(2000).attr("d", pathn);
+			d3.select(".pagetitle")
+				.text("Part-time Employment/Volontary");
+			d3.select(".amount")
+				.text("EU-28: 23.2%");
+	}    
+	function data4(){
+			tempmap.data(polygon5.features).transition().duration(2000).attr("d", pathn);
+			d3.select(".pagetitle")
+				.text("Part-time Employment/Involontary");
+			d3.select(".amount")
+				.text("EU-28: 9%");			
+	}
+	function updatevalue(d){
+		var val;
+		var val2
+		if (selectedvariable==1) {return ["",""];}
+//		else if (selectedvariable==2) {
+		else if (selectedvariable==2) {
+			if (d.tmpempvol == 0 || d.tmpempvol == null) {val = "N/A ";}
+			else val = "Temporary employment/Volontary: " + d.tmpempvol + "%";
+		}
+		else if (selectedvariable==3) {
+			if (d.tmpempinv == 0) {val = "N/A ";}
+			else val = "Temporary employment/Involontary: " + d.tmpempinv + "%";
+		}
+		else if (selectedvariable==4) {
+			if (d.ptempvol == 0) {val = "N/A ";}
+			else val = "Part-time Employment/Volontary: " + d.ptempvol + "%";
+		}
+		else if (selectedvariable==5) {
+			if (d.ptempinvo == 0) {val = "N/A ";}
+			else val = "Part-time Employment/Involontary: " + d.ptempinvo + "%";
+		}
+		//return [val, d3.format("0.1%")(val2) + " of total"];
+		return [val];
+	}
+	               
+	function mouseover(properties){
+		var code = properties.code;
+		var name = properties.name;
+		var quantity = updatevalue(properties);
+		
+		d3.selectAll(".country")
+			.filter(function(d){
+				return d.properties.code == code;				
+			})
+			//.transition()
+			//.duration(300)
+			.style("fill","#a6bddb");
+
+		var xpos = d3.event.pageX + 10;
+		var ypos = d3.event.pageY + 20;
+		d3.select(".tooltip2")
+			.text(name);
+		d3.select(".tooltip3")
+			.text(quantity[0]);
+		d3.selectAll(".tooltip")
+	                .style("left", xpos + "px")
+	                .style("top", ypos + "px")
+			.transition()
+			.duration(150)
+			.style("opacity",0.9);
+	}
+	function mouseout(code){
+		d3.selectAll(".country")
+			.filter(function(d){
+				return d.properties.code == code;
+			})
+	                .style("fill", function(d){
+	                   	return colors[d.properties.code];
+	                });
+	        d3.selectAll(".tooltip").transition().duration(150)
+			.style("opacity",0);
+	}	
+});
+});
+});
+});
+});
+
+function addpts(linearr, startp, counts, counte) {
+    var linearrnew = linearr;
+    var i = -1;
+    var addnum = - counts + counte;
+    var spacing = counts / (addnum + 1);
+    var addindex;
+    var priorindex;
+    var newval0;
+    var newval1;
+    
+    while (++i < addnum) {
+    	addindex = (startp + Math.round((i+1)*spacing) + i+1) % linearrnew.length;
+    	if (addindex == 0) {addindex = 1;}
+    	priorindex = (addindex - 1  + linearrnew.length) % linearrnew.length;
+    	newval0 = (linearrnew[priorindex][0] + linearrnew[addindex][0])/2;
+    	newval1 = (linearrnew[priorindex][1] + linearrnew[addindex][1])/2 + 0.00000000001;
+        linearrnew.splice(addindex, 0, [newval0, newval1]);
+    }
+    return linearrnew;
+}
+
+function rotatearray(a, inc) {
+    a.splice(0,1)
+    for (var l = a.length, inc = (Math.abs(inc) >= l && (inc %= l), inc < 0 && (inc += l), inc), i, x; inc; inc = (Math.ceil(l / inc) - 1) * inc - l + (l = inc))
+    for (i = l; i > inc; x = a[--i], a[i] = a[i - inc], a[i - inc] = x);
+
+    a.splice(0,0,a[a.length-1]);
+
+     return a;
+};
+
+function alignfeatureorder(poly1, poly2) {
+	var i = 0;
+	var j = 0;
+	var tempfeature;
+	var n = poly1.features.length;
+	while (++i < n) {
+			j = 0;
+			while (++j < n) {
+				if (+poly1.features[j-1].properties.ID > +poly1.features[j].properties.ID){
+					tempfeature = poly1.features[j-1];
+					poly1.features[j-1] = poly1.features[j];
+					poly1.features[j] = tempfeature;
+				}
+				if (+poly2.features[j-1].properties.ID > +poly2.features[j].properties.ID){
+					tempfeature = poly2.features[j-1];
+					poly2.features[j-1] = poly2.features[j];
+					poly2.features[j] = tempfeature;
+				}
+			}
+	}
+	return [poly1, poly2];
+}
+
+function calcrotation(line1, line2) {
+	var l1 = line1;
+	var l2 = line2;
+	var len = line1.length;
+	var i;
+	var j;
+	temparr = [];
+	resultarr = [];
+	var mindist = [-9999,9999];
+	
+	for (i = 0; i < len; i++){
+		for (j = 0; j < len; j++){
+			temparr[j] = dist(l1[j], l2[(i + j) % len]);
+		}	
+		resultarr[i] = avg(temparr);
+		if (resultarr[i][0] < mindist[1]) {
+			mindist[0] = i;
+			mindist[1] = resultarr[i][0];
+		}
+	}
+	return mindist[0];
+}
+
+function dist(p1, p2){
+	return Math.sqrt((p1[0] - p2[0])*(p1[0] - p2[0]) + (p1[1] - p2[1])*(p1[1] - p2[1]));
+}
+
+function avg(arr) {
+	var i;
+	var tot = 0;
+	var avg1 = 0;
+	var stdv = 0;
+	
+	for (i = 0; i < arr.length; i++){
+		tot = tot + arr[i]
+	}
+	avg1 = tot / arr.length;
+	tot = 0;
+	for (i = 0; i < arr.length; i++){
+		tot = (arr[i] - avg1) * (arr[i] - avg1);
+	}
+	tot = tot / (arr.length - 1);
+	stdv = Math.sqrt(tot);
+	return [avg1, stdv];
+}
+</script>
